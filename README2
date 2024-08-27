@@ -1,0 +1,25 @@
+training_set.csv
+
+- seven visits per person
+
+- removed the following columns: 
+
+  giveaway_feats: ['MEMORY', 'ORIENT', 'JUDGMENT', 'COMMUN', 'HOMEHOBB', 'PERSCARE', 'CDRGLOB', 'NACCMMSE']
+
+  time_feats = ["VISITDATE", "COURSE", "VISITDAY", "VISITMO", "VISITYR"]
+
+  irrelevant_feats = ['visitorder',
+  'NACCUDSD',
+  'NACCDAYS',
+  'NACCMMSE',
+  'NACCAVST',
+  'NACCFDYS',
+  '...7',
+  'NACCADC',
+  'interval',
+  'NACCVNUM',
+  'patient_id',]
+
+- target column: CDRSUM
+
+- ID column: NACCID
