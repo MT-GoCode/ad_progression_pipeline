@@ -24,8 +24,8 @@ pyyaml = "^6.0.2"
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
 
-[mypy]
-ignore_missing_imports = True
+[tool.mypy]
+ignore_missing_imports = true
 
 [build-system]
 requires = ["poetry-core"]
