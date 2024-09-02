@@ -6,18 +6,26 @@ authors = ["Minh <tminh.us@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.13"
-imbalanced-learn = "0.1.1"
+python = ">=3.9,<3.12"
+imbalanced-learn = "^0.12.3"
 tensorflow = "2.17.0"
 matplotlib = "^3.9.2"
 numpy = "1.26.0"
 pandas = "^2.2.2"
-scikit-learn = "^1.5.1"
+scikit-learn = "==1.0.2"
 optuna = "^3.6.1"
 pre-commit = "^3.8.0"
 ruff = "^0.6.3"
 mypy = "^1.11.2"
+tensorflow-io-gcs-filesystem = "0.31.0"
+prefect = "^2.20.4"
+pyyaml = "^6.0.2"
 
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
+
+[mypy]
+ignore_missing_imports = True
 
 [build-system]
 requires = ["poetry-core"]
@@ -25,3 +33,16 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 line-length = 150
+# Basic linting (PEP 8 compliance, etc.)
+select = [
+    "ALL"
+]
+ignore = [
+    'D', # docstring shit
+    'PD015',
+    'ANN401',
+    'N806',
+    'G004', # logging statement f string
+    'DTZ', # datetime bs
+    'PTH',
+]
