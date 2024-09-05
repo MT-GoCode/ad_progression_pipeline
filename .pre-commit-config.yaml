@@ -2,7 +2,13 @@ repos:
   # Ruff for linting and formatting
   - repo: local
     hooks:
-      # Run the linter.
+      # Run the formatter first.
+      - id: ruff-format
+        name: ruff-format
+        entry: ruff format
+        language: system
+        types: [python]
+      # Run the linter after formatting.
       - id: ruff
         name: ruff
         args: [ --fix ]
@@ -10,12 +16,6 @@ repos:
         language: system
         types: [python]
         exclude: "docs.*"
-      # Run the formatter.
-      - id: ruff-format
-        name: ruff-format
-        entry: ruff format
-        language: system
-        types: [python]
 
   # Mypy for type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
