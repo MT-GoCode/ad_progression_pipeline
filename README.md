@@ -3,21 +3,29 @@
 1.
 `git clone` this
 
+2. Use correct python version.
+
+install python 3.10 executable, then run these:
+
+`cd ad_progression_pipeline`
+
+`poetry env use <path to python 3.10 executable>`
+
 2. Install dependencies
 
 `poetry install`
 
-For some reason, this package may need to be installed separately:
+Deactivate any environments you have, like venv or conda envs
 
-`pip install tensorflow-io-gcs-filesystem && poetry add tensorflow-io-gcs-filesystem==0.31.0`
+`poetry shell` to open a virtual environment with the dependencies. Otherwise, you will need to prefix each command with `poetry run`
 
-`pip install prefect`
+3. Setup prefect
 
 `prefect cloud login` (May need to create a new account, should be quick)
 
 3. Try running an end-to-end pipeline
 
-`poetry run python -m ad_progression_pipeline.pipelines.training.random_forest`
+`poetry run python -m ad_progression_pipeline.pipeline.end_to_end.training.random_forest`
 
 This random_forest file is a good entry point to explore the codebase.
 
