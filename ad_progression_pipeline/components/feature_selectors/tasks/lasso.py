@@ -7,8 +7,7 @@ from ad_progression_pipeline.utils.prefect import local_cached_task
 
 
 @local_cached_task
-def train(df : pd.DataFrame, top_x: int) -> list:
-
+def train(df: pd.DataFrame, top_x: int) -> list:
     x = df.drop(columns=["CDRSUM"])
     y = df["CDRSUM"]
 
@@ -23,6 +22,7 @@ def train(df : pd.DataFrame, top_x: int) -> list:
 
     return important_features.tolist()
 
+
 @local_cached_task
-def apply(df : pd.DataFrame, features : list) -> pd.DataFrame:
+def apply(df: pd.DataFrame, features: list) -> pd.DataFrame:
     return df[[*features, "CDRSUM"]]

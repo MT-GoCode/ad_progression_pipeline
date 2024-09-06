@@ -1,11 +1,9 @@
-
 # @dataclass
 # class Hyperparameters:
 
 # class RNN_Factory:
 
 #     def __init__(self, params, visit_inputs):
-
 
 
 #     def clean_data(self):
@@ -32,7 +30,6 @@
 #         # Select the desired columns and convert to a NumPy matrix
 
 #     def build_train_model(self, X : pd.DataFrame, Y):
-
 
 
 #         for i in range(self.params.dense_layer_count):

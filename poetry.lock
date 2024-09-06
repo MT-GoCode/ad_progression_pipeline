@@ -4141,6 +4141,17 @@ pure-eval = "*"
 tests = ["cython", "littleutils", "pygments", "pytest", "typeguard"]
 
 [[package]]
+name = "tbtrim"
+version = "0.3.1"
+description = "A utility to trim Python traceback information."
+optional = false
+python-versions = ">=2.6"
+files = [
+    {file = "tbtrim-0.3.1-py2.py3-none-any.whl", hash = "sha256:48265ad3aeee3bfcc6f0972f6fad623bd99302dce616e1d451663649b50fde19"},
+    {file = "tbtrim-0.3.1.tar.gz", hash = "sha256:b6285ac02e9a7b78fab97de65668fe2def0f5d8783b0e0dfcb4b7c0a635b3d11"},
+]
+
+[[package]]
 name = "tensorboard"
 version = "2.17.1"
 description = "TensorBoard lets you watch Tensors Flow"
@@ -4808,4 +4819,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "cf63dd3e44991399dabe73e2dd56bd711bdd6c798807e8b36c068036ccd5bec7"
+content-hash = "03aa1036c505d736d1ecdaafe04b0a8350ea65a8de78e4dfc62be6b89c542d87"

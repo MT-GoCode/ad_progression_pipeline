@@ -10,7 +10,6 @@ from ad_progression_pipeline.utils.constants import RANDOM_SEED, UNACCOUNTED_COL
 
 @flow
 def categorical_data_preparation() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-
     log = get_run_logger()
 
     # STEP 0
@@ -21,7 +20,7 @@ def categorical_data_preparation() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataF
     test = test.drop(columns=UNACCOUNTED_COLUMNS)
 
     # STEP 1: IMPUTATION
-    train, test = run_imputation(train_df = train, test_df = test)
+    train, test = run_imputation(train_df=train, test_df=test)
     train_naccid_col = train["NACCID"]
     test_naccid_col = test["NACCID"]
     # will need this later. column transformation cannot operate on this as it is not a feature column. But flattening will need this.
@@ -40,13 +39,13 @@ def categorical_data_preparation() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataF
     log.info("STEP 3: FEATURE SELECTION COMPLETE")
 
     # STEP 4: RESHAPING + ADD PROGRESSION COLUMN
-    train["NACCID"] = train_naccid_col
-    test["NACCID"] = test_naccid_col
-    train = categorical_ingestion(df = train)
-    test = categorical_ingestion(df = test)
+    train.loc[:, "NACCID"] = train_naccid_col
+    test.loc[:, "NACCID"] = test_naccid_col
+    train = categorical_ingestion(df=train)
+    test = categorical_ingestion(df=test)
     # categorical ingestion
 
     # STEP 5: SPLIT TRAIN INTO TRAIN AND VAL
-    train, val = train_test_split(train, test_size = 0.2, random_state = RANDOM_SEED)
+    train, val = train_test_split(train, test_size=0.2, random_state=RANDOM_SEED)
 
     return train, val, test

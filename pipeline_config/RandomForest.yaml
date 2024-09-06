@@ -1,3 +1,5 @@
+model : Random Forest
+
 data_dir : data/
 num_input_visits : 3
 

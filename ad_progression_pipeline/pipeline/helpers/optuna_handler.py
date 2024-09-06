@@ -1,7 +1,9 @@
 import optuna
+from prefect import task
 
 
-def suggest_hyperparameters(ranges : dict, trial : optuna.trial.Trial) -> dict:
+@task
+def suggest_hyperparameters(ranges: dict, trial: optuna.trial.Trial) -> dict:
     _ = {}
     if "categorical" in ranges:
         for param, choices in ranges["categorical"].items():

@@ -15,9 +15,11 @@ install python 3.10 executable, then run these:
 
 `poetry install`
 
-Deactivate any environments you have, like venv or conda envs
+Deactivate any environments you have, like venv or conda envs.
 
 `poetry shell` to open a virtual environment with the dependencies. Otherwise, you will need to prefix each command with `poetry run`
+
+If you're using VSCode, it is handy to set the correct interpreter path to `which python` to have syntax highlighting
 
 3. Setup prefect
 
@@ -25,12 +27,13 @@ Deactivate any environments you have, like venv or conda envs
 
 3. Try running an end-to-end pipeline
 
-`poetry run python -m ad_progression_pipeline.pipeline.end_to_end.training.random_forest`
+`python -m ad_progression_pipeline.pipeline.end_to_end.training.categorical_trainer --config pipeline_config/RandomForest.yaml`
 
 This random_forest file is a good entry point to explore the codebase.
 
 # File Structure Overview
 
+```
 ad_progression_pipeline/
 
     components/ -> includes code for individual steps of a pipeline, like imputation or running model
@@ -50,7 +53,7 @@ data/ -> includes all relevant data
     optuna_runs/
 
         <model_name><date_time> -> includes optuna training history, and serialized versions of the model
-
+```
 
 # Development Guide / Notes
 

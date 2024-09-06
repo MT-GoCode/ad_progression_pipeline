@@ -15,7 +15,6 @@ repos:
         entry: ruff check
         language: system
         types: [python]
-        exclude: "docs.*"
 
   # Mypy for type checking
   - repo: https://github.com/pre-commit/mirrors-mypy

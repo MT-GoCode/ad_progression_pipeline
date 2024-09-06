@@ -1,4 +1,3 @@
-
 import pandas as pd
 from prefect import get_run_logger
 from sklearn.impute import KNNImputer, SimpleImputer
@@ -7,7 +6,7 @@ from ad_progression_pipeline.utils.constants import CATEGORICAL_FEATURES, NUMERI
 from ad_progression_pipeline.utils.prefect import local_cached_task
 
 
-def train_knn_imputers(input_df : pd.DataFrame, columns: list, n_neighbors : int) -> dict:
+def train_knn_imputers(input_df: pd.DataFrame, columns: list, n_neighbors: int) -> dict:
     imputer_map = {}
 
     for feat in columns:
@@ -20,7 +19,8 @@ def train_knn_imputers(input_df : pd.DataFrame, columns: list, n_neighbors : int
 
     return imputer_map
 
-def train_median_imputers(input_df : pd.DataFrame, columns: list) -> dict:
+
+def train_median_imputers(input_df: pd.DataFrame, columns: list) -> dict:
     imputer_map = {}
 
     for col in columns:
@@ -33,8 +33,9 @@ def train_median_imputers(input_df : pd.DataFrame, columns: list) -> dict:
 
     return imputer_map
 
+
 @local_cached_task
-def train(train_df : pd.DataFrame) -> tuple[dict, dict]:
+def train(train_df: pd.DataFrame) -> tuple[dict, dict]:
     logger = get_run_logger()
     logger.info("Training Imputers...")
     included_numerical_columns = [_ for _ in NUMERICAL_FEATURES if _ in train_df.columns]
@@ -45,12 +46,9 @@ def train(train_df : pd.DataFrame) -> tuple[dict, dict]:
 
     return knn_imputer_map, median_imputer_map
 
-@local_cached_task
-def run(train_df : pd.DataFrame,
-        test_df : pd.DataFrame,
-        knn_imputer_map : dict,
-        median_imputer_map: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
 
+@local_cached_task
+def run(train_df: pd.DataFrame, test_df: pd.DataFrame, knn_imputer_map: dict, median_imputer_map: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
     for df in [train_df, test_df]:
         for col in knn_imputer_map:
             df[[col]] = knn_imputer_map[col].transform(df[[col]])

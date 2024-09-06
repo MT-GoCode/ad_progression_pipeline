@@ -27,7 +27,6 @@
 #             "INCONTF","ALCOHOL", "ABUSOTHR","PSYCDIS"]
 
 
-
 #     ord_gds_feats = ["NOGDS", # -4 = NaN - binary
 #             "SATIS", "DROPACT", "EMPTY", "BORED", "SPIRITS", "AFRAID",
 #             "HAPPY", "HELPLESS", "STAYHOME", "MEMPROB", "WONDRFUL", "WRTHLESS",
@@ -38,7 +37,6 @@
 #     ord_npi_feats = ["DELSEV", "HALLSEV", "AGITSEV", "DEPDSEV", "ANXSEV",
 #                 "ELATSEV", "APASEV", "DISNSEV", "IRRSEV", "MOTSEV", "NITESEV",
 #                 "APPSEV"]
-
 
 
 #     # CDR features are never missing and are all ordinal
@@ -73,7 +71,6 @@
 #        ],
 #             # If your data frame includes other features, uncomment the line below
 #         ],
-
 
 
 # def split_data(data,test_percent=0.2,random_seed=None):

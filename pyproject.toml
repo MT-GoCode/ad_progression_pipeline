@@ -21,6 +21,7 @@ tensorflow-io-gcs-filesystem = "*"
 prefect = "^2.20.4"
 pyyaml = "^6.0.2"
 scipy = "^1.14.1"
+tbtrim = "^0.3.1"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -36,10 +37,10 @@ build-backend = "poetry.core.masonry.api"
 [tool.ruff]
 line-length = 150
 # Basic linting (PEP 8 compliance, etc.)
-select = [
+lint.select = [
     "ALL"
 ]
-ignore = [
+lint.ignore = [
     'D', # docstring shit
     'PD015',
     'ANN401',
@@ -47,4 +48,8 @@ ignore = [
     'G004', # logging statement f string
     'DTZ', # datetime bs
     'PTH',
+    'FA',
+    'FIX',
+    'TD',
+    'F4'
 ]
