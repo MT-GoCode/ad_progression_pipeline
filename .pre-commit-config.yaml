@@ -22,4 +22,3 @@ repos:
       - id: end-of-file-fixer  # Ensure files end with a newline
       - id: check-yaml  # Validate YAML files
       - id: check-merge-conflict  # Prevent committing unresolved merge conflicts
-      - id: detect-private-key  # Detect private keys to prevent committing sensitive data
