@@ -171,6 +171,8 @@ UNACCOUNTED_COLUMNS = [
     "DIGBACLS",
     "NACCAPOE",
     "IMPAIRMENTS",
+    "DECSUB...140",
+    "DECSUB...194",
 ]
 
 # combined

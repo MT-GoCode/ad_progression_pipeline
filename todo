@@ -1,0 +1,29 @@
+Tasks by priority
+Critical
+- implement data cleaning ops, columnar transforms, progression, columns, etc.
+    - i'll deal with specific column stuff -- keep this one, drop that, etc. once ruslan rebuilds the beginning part.
+    - make sure info about which columns are cat, ord, etc. informs later models
+    - Smote-TS rebalancing
+- implement xgboost
+- implement rnn pipeline
+- other feature selectors
+- other rebalancers (random resampling)
+- metrics, gotta have balanced accuracy and rnn confusion matrix
+
+Next
+- create testing metrics artifact
+- create deserialization functions
+- create testing pipeline independent of training
+- organize data folder by pipeline type
+- SIGINT handler
+- plotting optuna results
+- continue training run pipeline
+- optuna pruning
+
+Pipelining
+- df caching
+- enforce keyword args
+- yaml file specifies which pipeline
+
+Questions
+- Which progression column

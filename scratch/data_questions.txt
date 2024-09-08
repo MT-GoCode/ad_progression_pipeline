@@ -8,11 +8,10 @@ Keep CDR feats as something we can add-in (future)
 For the unaccounted columns, keep:
 - NACCAPOE (at present, it is ordinal, but you should encode to: E4 carrier [0, 1, 2], E2 carrier ordinal [0, 1, 2])
 - Keep columns if there's not too many missing values (that)
+
 - and keep DECSUB lol (may need to find from original dataset)
 
-
-
-
+- constant columns?
 
 
 
@@ -23,7 +22,6 @@ time_feats = ["VISITDATE", "COURSE", "VISITDAY", "VISITMO", "VISITYR"]
 irrelevant_feats = ['visitorder',
  'NACCUDSD',
  'NACCDAYS',
-
  'NACCAVST',
  'NACCFDYS',
  '...7',

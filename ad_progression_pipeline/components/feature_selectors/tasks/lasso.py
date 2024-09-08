@@ -8,7 +8,7 @@ from ad_progression_pipeline.utils.prefect import local_cached_task
 
 @local_cached_task
 def train(df: pd.DataFrame, top_x: int) -> list:
-    x = df.drop(columns=["CDRSUM"])
+    x = df.drop(columns=["CDRSUM", "NACCID"])
     y = df["CDRSUM"]
 
     scaler = StandardScaler()
@@ -25,4 +25,4 @@ def train(df: pd.DataFrame, top_x: int) -> list:
 
 @local_cached_task
 def apply(df: pd.DataFrame, features: list) -> pd.DataFrame:
-    return df[[*features, "CDRSUM"]]
+    return df[["NACCID", *features, "CDRSUM"]]

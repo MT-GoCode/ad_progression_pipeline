@@ -1,5 +1,6 @@
 from typing import Any
 
+import numpy as np
 import pandas as pd
 from prefect import context
 
@@ -8,12 +9,12 @@ from ad_progression_pipeline.utils.prefect import local_cached_task
 
 
 @local_cached_task
-def gen_x(df: pd.DataFrame) -> Any:
+def gen_x(df: pd.DataFrame) -> pd.DataFrame:
     return df.groupby("NACCID").head(context.num_input_visits)
 
 
 @local_cached_task
-def gen_y(df: pd.DataFrame) -> Any:
+def gen_y(df: pd.DataFrame) -> pd.DataFrame:
     return df.groupby("NACCID").tail(TOTAL_VISITS - context.num_input_visits)
 
 
@@ -65,14 +66,40 @@ def flatten_add_progression(df: pd.DataFrame) -> pd.DataFrame:
 
     result = pd.merge(result, progression_map(df), on="NACCID", how="left").drop(columns="NACCID")
     result = result.loc[:, ~result.columns.str.contains("NACCID")]
-    result.to_csv("flattened_3.csv")
+
     return result
 
 
 @local_cached_task
-def sequence_ingestion(df: pd.DataFrame) -> pd.DataFrame:
-    non_numeric_cols = df.select_dtypes(exclude=["number"]).columns
-    df.data.input_data[non_numeric_cols] = df[non_numeric_cols].apply(lambda col: pd.to_numeric(col.astype(str), errors="coerce"))
+def sequence_ingestion(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+    progression_map(df)
+
     x_ = gen_x(df)
     y_ = gen_y(df)
-    return x_.drop(columns=["NACCID"]), y_.drop(columns=["NACCID"])
+
+    # INPUT DATA
+    input_df = x_.sort_values("NACCID").drop(columns=["NACCID"])
+
+    timesteps = context.num_input_visits
+    num_samples = int(len(input_df) / timesteps)
+    num_features = len(input_df.columns)
+
+    import pdb
+
+    pdb.set_trace()
+
+    input_matrix = input_df.to_numpy()
+    input_matrix = input_matrix.reshape((num_samples, timesteps, num_features))
+
+    # OUTPUT DATA
+    output_df = y_.sort_values("NACCID")
+    output_df = output_df["CDRSUM"]
+
+    timesteps = TOTAL_VISITS - context.num_input_visits
+    num_samples = int(len(output_df) / timesteps)
+    num_features = 1  # just CDRSUM
+
+    output_matrix = output_df.to_numpy()
+    output_matrix = output_matrix.reshape((num_samples, timesteps, num_features))
+
+    return input_matrix, output_matrix

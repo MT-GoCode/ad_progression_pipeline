@@ -1,0 +1,55 @@
+pipeline : train
+model : RNN
+
+data_dir : data/
+num_input_visits : 3
+
+optuna_ranges:
+  categorical:
+    feature_selector :
+      - LASSO
+    lstm_units_1:
+      - 32
+      - 64
+      - 128
+      - 256
+    lstm_units_2:
+      - 32
+      - 64
+      - 128
+      - 256
+    loss_function:
+      - weighted_mse
+      - linear_weighted_mse
+    optimizer:
+      - Adam
+      - RMSprop
+      - Nadam
+    learning_rate:
+      - 0.00001
+      - 0.0001
+      - 0.001
+      - 0.01
+  int:
+    num_features_selected:
+      - 5
+      - 40
+    dense_units:
+      - 4
+      - 20
+    epochs:
+      - 50
+      - 150
+    dense_layer_count:
+      - 1
+      - 5
+  float:
+    lstm_dropout_rate_1:
+      - 0.01
+      - 0.5
+    lstm_dropout_rate_2:
+      - 0.01
+      - 0.5
+    dense_dropout_rate:
+      - 0.01
+      - 0.5

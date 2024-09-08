@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Type
 
+import numpy as np
 import pandas as pd
 
 
@@ -9,11 +10,11 @@ class ModelInterface(ABC):
         self.model = None
 
     @abstractmethod
-    def train(self, df: pd.DataFrame) -> None:
+    def train(self) -> None:
         pass
 
     @abstractmethod
-    def infer_and_gather_metrics(self, df: pd.DataFrame) -> dict:
+    def infer_and_gather_metrics(self) -> dict:
         pass
 
     @abstractmethod

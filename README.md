@@ -27,7 +27,7 @@ If you're using VSCode, it is handy to set the correct interpreter path to `whic
 
 3. Try running an end-to-end pipeline
 
-`python -m ad_progression_pipeline.pipeline.end_to_end.training.categorical_trainer --config pipeline_config/RandomForest.yaml`
+`python -m ad_progression_pipeline.pipeline.end_to_end.training.categorical_trainer --config sample_configs/RandomForest.yaml`
 
 This random_forest file is a good entry point to explore the codebase.
 
@@ -72,3 +72,21 @@ run `poetry shell` once to create a persistent virtual env with the right python
 To take advantage of prefect's caching, set
 
 `prefect config set PREFECT_RESULTS_PERSIST_BY_DEFAULT=true`
+
+If you keep running into Prefect HTTP errors, run
+`prefect config set PREFECT_API_ENABLE_HTTP2=false`
+
+Note that functions not labeled as tasks and flows can still access context. You won't be able to take advantage of caching. Do this when you hit rate limits on parameter passage
+
+You may run into the issue of not being able to import tensorflow even after doing poetry add. note that you must also install tensorflow-intel, tensorflow-macos it seems.
+
+https://github.com/python-poetry/poetry/issues/8271#issuecomment-1712020965
+
+To avoid overloading their API especially when you need to cache results, setup local cache.
+
+
+If you want to host your own prefect instance,
+
+`prefect config set PREFECT_API_URL="http://127.0.0.1:4200/api"`
+
+then start a server at `prefect server start`, then proceed as normal. To return to cloud, use prefect cloud login
