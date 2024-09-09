@@ -1,8 +1,10 @@
 import numpy as np
 import pandas as pd
-from prefect import flow
 
-from ad_progression_pipeline.components.ingestion.tasks import column_transformers, reshapers
+from ad_progression_pipeline.components.ingestion.tasks import (
+    column_transformers,
+    reshapers,
+)
 
 
 def categorical_ingestion(df: pd.DataFrame) -> pd.DataFrame:

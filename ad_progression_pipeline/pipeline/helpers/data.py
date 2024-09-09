@@ -1,10 +1,10 @@
 import pandas as pd
 from prefect import context, flow, get_run_logger
-from sklearn.model_selection import train_test_split
 
-from ad_progression_pipeline.components.feature_selectors.flows import run_feature_selection
+from ad_progression_pipeline.components.feature_selectors.flows import (
+    run_feature_selection,
+)
 from ad_progression_pipeline.components.imputation.flows import run_imputation
-from ad_progression_pipeline.components.ingestion.flows import categorical_ingestion
 from ad_progression_pipeline.utils.constants import UNACCOUNTED_COLUMNS
 
 

@@ -1,26 +1,27 @@
-import numpy as np
 import pandas as pd
-from prefect import context, get_run_logger, task
+from prefect import get_run_logger
 from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
-from sklearn.model_selection import StratifiedGroupKFold, StratifiedKFold, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
 
-from ad_progression_pipeline.utils.constants import CATEGORICAL_FEATURES, NUMERICAL_FEATURES, ORDINAL_FEATURES
+from ad_progression_pipeline.utils.constants import (
+    CATEGORICAL_FEATURES,
+    NUMERICAL_FEATURES,
+    ORDINAL_FEATURES,
+)
 from ad_progression_pipeline.utils.prefect import local_cached_task
 
 
 @local_cached_task
-def run(df: pd.DataFrame):
+def run(df: pd.DataFrame) -> pd.DataFrame:
     log = get_run_logger()
     add_later = df[["CDRSUM", "NACCID"]]
 
     df = df.drop(columns=["CDRSUM", "NACCID"])
 
-    cat_feats = [x for x in CATEGORICAL_FEATURES if x in df.columns.values]
-    ord_feats = [x for x in ORDINAL_FEATURES if x in df.columns.values]
-    num_feats = [x for x in NUMERICAL_FEATURES if x in df.columns.values]
+    cat_feats = [x for x in CATEGORICAL_FEATURES if x in df.columns]
+    ord_feats = [x for x in ORDINAL_FEATURES if x in df.columns]
+    num_feats = [x for x in NUMERICAL_FEATURES if x in df.columns]
 
     numeric_transformer = Pipeline(
         steps=[
@@ -54,7 +55,15 @@ def run(df: pd.DataFrame):
 
     # new columns consists of the new one hot encoded columns... and everything else as before
 
-    new_columns = num_feats + ord_feats + list(preprocessor.transformers_[2][1].named_steps["encoder"].get_feature_names_out(cat_feats))
+    new_columns = (
+        num_feats
+        + ord_feats
+        + list(
+            preprocessor.transformers_[2][1]
+            .named_steps["encoder"]
+            .get_feature_names_out(cat_feats),
+        )
+    )
 
     df = pd.DataFrame(transformed_data, columns=new_columns)
 

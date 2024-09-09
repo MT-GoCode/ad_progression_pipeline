@@ -1,9 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Type
 
-import numpy as np
-import pandas as pd
-
 
 class ModelInterface(ABC):
     def __init__(self) -> None:

@@ -1,34 +1,13 @@
-import functools
-import os
-from collections import Counter
-from dataclasses import dataclass, field
-from typing import Callable, Optional
-
-import joblib
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline
-from prefect import context, get_run_logger
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import (
-    accuracy_score,
-    auc,
-    confusion_matrix,
-    f1_score,
-    precision_score,
-    recall_score,
-    roc_curve,
-)
-from sklearn.preprocessing import StandardScaler
-from tensorflow.keras import backend as K
+from prefect import context
+from tensorflow.keras import backend as K  # noqa: N812
 from tensorflow.keras import layers, models
 from tensorflow.keras.callbacks import EarlyStopping
 
-from ad_progression_pipeline.components.models.tasks.serialize_metrics import serialize_metrics
-from ad_progression_pipeline.utils.constants import RANDOM_SEED, TOTAL_VISITS
+from ad_progression_pipeline.utils.constants import TOTAL_VISITS
 
 from .model_interface import ModelInterface
 
@@ -40,14 +19,26 @@ class RNN(ModelInterface):
         params = context.hyperparameters
 
         self.model = models.Sequential()
-        self.model.add(layers.LSTM(units=params["lstm_units_1"], return_sequences=True, input_shape=(input_matrix.shape[1], input_matrix.shape[2])))
+        self.model.add(
+            layers.LSTM(
+                units=params["lstm_units_1"],
+                return_sequences=True,
+                input_shape=(input_matrix.shape[1], input_matrix.shape[2]),
+            ),
+        )
         self.model.add(layers.Dropout(rate=params["lstm_dropout_rate_1"]))
         self.model.add(layers.LSTM(units=params["lstm_units_2"]))
         self.model.add(layers.Dropout(rate=params["lstm_dropout_rate_2"]))
-        for i in range(params["dense_layer_count"]):
+        for _ in range(params["dense_layer_count"]):
             self.model.add(layers.Dense(units=params["dense_units"], activation="relu"))
             self.model.add(layers.Dropout(rate=params["dense_dropout_rate"]))
-        self.model.add(layers.Dense(units=TOTAL_VISITS - context.num_input_visits, activation="linear", name="output"))
+        self.model.add(
+            layers.Dense(
+                units=TOTAL_VISITS - context.num_input_visits,
+                activation="linear",
+                name="output",
+            ),
+        )
 
         early_stopping = EarlyStopping(
             monitor="val_loss",
@@ -56,17 +47,22 @@ class RNN(ModelInterface):
             restore_best_weights=True,
         )
 
-        loss_map = {"weighted_mse": self.weighted_mse, "linear_weighted_mse": self.linear_weighted_mse}
-        optimizer_map = {"Adam": tf.keras.optimizers.Adam, "RMSprop": tf.keras.optimizers.RMSprop, "Nadam": tf.keras.optimizers.Nadam}
+        loss_map = {
+            "weighted_mse": self.weighted_mse,
+            "linear_weighted_mse": self.linear_weighted_mse,
+        }
+        optimizer_map = {
+            "Adam": tf.keras.optimizers.Adam,
+            "RMSprop": tf.keras.optimizers.RMSprop,
+            "Nadam": tf.keras.optimizers.Nadam,
+        }
 
         self.model.compile(
             loss=loss_map[params["loss_function"]],
             optimizer=optimizer_map[params["optimizer"]](params["learning_rate"]),
             metrics=["mean_absolute_error"],
         )
-        import pdb
 
-        pdb.set_trace()
         self.history = self.model.fit(
             input_matrix,
             output_matrix,
@@ -88,7 +84,7 @@ class RNN(ModelInterface):
     def deserialize(self, input_dir: str) -> None:
         pass
 
-    def weighted_mse(self, y_true, y_pred):
+    def weighted_mse(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
         y_true = K.reshape(y_true, shape=(-1, 4))
         y_pred = K.reshape(y_pred, shape=(-1, 4))
 
@@ -103,7 +99,7 @@ class RNN(ModelInterface):
 
         return K.mean(weighted_mse, axis=-1)
 
-    def linear_weighted_mse(self, y_true, y_pred):
+    def linear_weighted_mse(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
         y_true = K.reshape(y_true, shape=(-1, 4))
         y_pred = K.reshape(y_pred, shape=(-1, 4))
 

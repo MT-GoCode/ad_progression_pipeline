@@ -1,6 +1,5 @@
-from prefect import context, flow
+from prefect import context
 
-from ad_progression_pipeline.pipeline import end_to_end
 from ad_progression_pipeline.pipeline.helpers import cli, context_handler
 
 if __name__ == "__main__":

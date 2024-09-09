@@ -1,13 +1,10 @@
 import base64
-import os
 from io import BytesIO
 
-import matplotlib
 import matplotlib.axes
-import matplotlib.pyplot as plt
 
 
-def save_plot_to_base64(ax: matplotlib.axes._axes.Axes):
+def save_plot_to_base64(ax: matplotlib.axes._axes.Axes) -> str:
     buffer = BytesIO()
     ax.figure.savefig(buffer, format="png")
     buffer.seek(0)
@@ -16,7 +13,7 @@ def save_plot_to_base64(ax: matplotlib.axes._axes.Axes):
     return img_base64
 
 
-def serialize_metrics(data: dict, file_path: str):
+def serialize_metrics(data: dict, file_path: str) -> None:
     """Takes a dictionary and creates a markdown file."""
     with open(file_path, "w") as f:
         for key, value in data.items():
@@ -25,7 +22,7 @@ def serialize_metrics(data: dict, file_path: str):
 
             if isinstance(value, (str, float, int)):
                 f.write(f"{value}\n\n")
-            elif isinstance(value, matplotlib.axes._axes.Axes):  # noqa
+            elif isinstance(value, matplotlib.axes._axes.Axes):  # noqa: SLF001
                 img_base64 = save_plot_to_base64(value)
                 f.write(f"![{key}](data:image/png;base64,{img_base64})\n\n")
             else:

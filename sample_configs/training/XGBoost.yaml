@@ -1,0 +1,24 @@
+pipeline : train
+model : XGBoost
+
+data_dir : data/
+num_input_visits : 3
+
+optuna_ranges :
+  categorical :
+    gamma:
+      - 0
+      - 0.1
+      - 1
+    max_depth:
+      - 5
+      - 7
+      - 10
+  int :
+    n_estimators :
+      - 100
+      - 150
+  float :
+    learning_rate :
+      - 0.05
+      - 0.1
