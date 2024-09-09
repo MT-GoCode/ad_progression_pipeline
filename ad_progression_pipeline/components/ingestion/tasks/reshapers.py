@@ -65,6 +65,7 @@ def flatten_add_progression(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     result = pd.merge(result, progression_map(df), on="NACCID", how="left").drop(columns="NACCID")
+
     result = result.loc[:, ~result.columns.str.contains("NACCID")]
 
     return result
@@ -84,17 +85,12 @@ def sequence_ingestion(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
     num_samples = int(len(input_df) / timesteps)
     num_features = len(input_df.columns)
 
-    import pdb
-
-    pdb.set_trace()
-
     input_matrix = input_df.to_numpy()
     input_matrix = input_matrix.reshape((num_samples, timesteps, num_features))
 
     # OUTPUT DATA
     output_df = y_.sort_values("NACCID")
     output_df = output_df["CDRSUM"]
-
     timesteps = TOTAL_VISITS - context.num_input_visits
     num_samples = int(len(output_df) / timesteps)
     num_features = 1  # just CDRSUM

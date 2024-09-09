@@ -1,17 +1,22 @@
 Tasks by priority
-Critical
-- implement data cleaning ops, columnar transforms, progression, columns, etc.
-    - i'll deal with specific column stuff -- keep this one, drop that, etc. once ruslan rebuilds the beginning part.
-    - make sure info about which columns are cat, ord, etc. informs later models
-    - Smote-TS rebalancing
+Critical, by next meeting:
+- implement rnn pipeline up to TEST
 - implement xgboost
-- implement rnn pipeline
 - other feature selectors
 - other rebalancers (random resampling)
-- metrics, gotta have balanced accuracy and rnn confusion matrix
+- kick off all pipelines
+- no smote during inference RF
+- make sure info about which columns are cat, ord, etc. informs later models
+- yaml file specifies optuna run (pruning, number of trials)
+- kick off all runs
+
+- implement data cleaning ops, columnar transforms, progression, columns, etc.
+    - i'll deal with specific column stuff -- keep this one, drop that, etc. once ruslan rebuilds the beginning part.
+    - Smote-TS rebalancing
+- metrics, gotta have balanced accuracy and rnn confusion matrix. What's nice though is because models are serialized, you can create new metrics whenever you want.
 
 Next
-- create testing metrics artifact
+- create testing metrics artifact (done)
 - create deserialization functions
 - create testing pipeline independent of training
 - organize data folder by pipeline type
@@ -23,7 +28,8 @@ Next
 Pipelining
 - df caching
 - enforce keyword args
-- yaml file specifies which pipeline
+- yaml file specifies which pipeline (done)
+
 
 Questions
 - Which progression column

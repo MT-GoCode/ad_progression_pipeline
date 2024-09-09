@@ -47,7 +47,10 @@ def train() -> None:
 
             pdb.set_trace()
             train_input_matrix, val_input_matrix, train_output_matrix, val_output_matrix = train_test_split(
-                train_input_matrix, train_output_matrix, test_size=0.2, random_state=RANDOM_SEED,
+                train_input_matrix,
+                train_output_matrix,
+                test_size=0.2,
+                random_state=RANDOM_SEED,
             )
             model.train(train_input_matrix, train_output_matrix)
             results = model.infer_and_gather_metrics(train_input_matrix, train_output_matrix)

@@ -39,21 +39,43 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 line-length = 150
+
 # Basic linting (PEP 8 compliance, etc.)
 lint.select = [
-    "ALL"
+    "ALL",      # General linting rules (does NOT select everything)
+    "I001",     # Import sorting via isort
+    # "B006",    # Detect mutable default arguments
+    "B008",     # Enforce keyword-only arguments
+    # "D",       # Ensure docstrings for classes, functions, methods
+    "ANN",      # Type hints for function arguments and return values
+    "F401",     # Unused imports
+    "F841",     # Unused variables
+    "E711",     # Use 'is' or 'is not' for None comparisons
+    "E301",     # One blank line before functions and classes
+    "E302",     # Two blank lines between top-level definitions
+    "E303",     # Limit maximum consecutive blank lines (default: 2)
+    "E305",     # Two blank lines after imports and class-level code
+    "W391",     # Ensure no trailing blank line at the end of the file
+    "C812",     # Enforce trailing commas in multi-line function definitions
+    "C416",     # Unnecessary list comprehension
+    "B301",     # Avoid unnecessary lambda expressions
+    "F601"      # Avoid duplicate dictionary keys
 ]
+
+fix = true
+
 lint.ignore = [
-    'D', # docstring shit
-    'PD015',
-    'ANN401',
-    'N806',
-    'G004', # logging statement f string
-    'DTZ', # datetime bs
-    'PTH',
-    'FA',
-    'FIX',
-    'TD',
-    'F4',
-    'PD901'
+    "TCH001", # type checking block import thing
+    "D",        # docstring enforcement
+    "PD015",
+    "ANN401",
+    "N806",
+    "G004",     # logging statement f string
+    "DTZ",      # datetime handling
+    "PTH",
+    "FA",
+    "FIX",
+    "TD",
+    "F4",
+    "PD901"
 ]
