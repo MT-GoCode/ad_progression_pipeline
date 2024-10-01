@@ -2,9 +2,7 @@ import pandas as pd
 from prefect import get_run_logger
 from sklearn.impute import KNNImputer, SimpleImputer
 
-from ad_progression_pipeline.utils.constants import (CATEGORICAL_FEATURES,
-                                                     NUMERICAL_FEATURES,
-                                                     ORDINAL_FEATURES)
+from ad_progression_pipeline.utils.constants import CATEGORICAL_FEATURES, NUMERICAL_FEATURES, ORDINAL_FEATURES
 from ad_progression_pipeline.utils.prefect import local_cached_task
 
 

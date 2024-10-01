@@ -1,8 +1,7 @@
 import pandas as pd
 from prefect import context, flow, get_run_logger
 
-from ad_progression_pipeline.components.feature_selectors.flows import \
-    run_feature_selection
+from ad_progression_pipeline.components.feature_selectors.flows import run_feature_selection
 from ad_progression_pipeline.components.imputation.flows import run_imputation
 from ad_progression_pipeline.utils.constants import UNACCOUNTED_COLUMNS
 
