@@ -1,3 +1,16 @@
+TODO LIST TO MVP
+- supervised encoder is getting terrible accuracy and loss
+- RNN confusion matrix evaluation
+- xgboost make sure it works
+- satisfy code quality checks -> once you finish these, your goal is reached.
+
+- I mispoke last time I talked to Yueqi. I'm NOT doing random forest for feature extraction, just LASSO + SE. Those two were the best-performing from last research project
+- also, sliding window literally gives half/half. no smote for now.
+
+Remaining HIGH PRIORITY tasks
+- get the proper dataset from Ruslan (for reproducibility purposes, and because I'm still using UNACCOUNTED_COLUMNS)
+- need to confirm, do we want CDRSUM or GLOB as output
+
 Tasks by priority
 Critical, by next meeting:
 - implement rnn pipeline up to TEST
@@ -6,7 +19,7 @@ Critical, by next meeting:
 - other rebalancers (random resampling)
 - kick off all pipelines
 - no smote during inference RF
-- make sure info about which columns are cat, ord, etc. informs later models
+- make sure info about which columns are cat, ord, etc. informs later models -> actually don't need to do this
 - yaml file specifies optuna run (pruning, number of trials)
 - kick off all runs
 

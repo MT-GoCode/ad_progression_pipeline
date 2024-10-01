@@ -1,10 +1,11 @@
 import optuna
+import sklearn
 from prefect import context, flow, get_run_logger
 from sklearn.model_selection import train_test_split
 
 from ad_progression_pipeline.components.ingestion.flows import categorical_ingestion, sequential_ingestion
 from ad_progression_pipeline.components.models.model_interface import ModelInterface
-from ad_progression_pipeline.pipeline.helpers import cli, context_handler, data, files, optuna_
+from ad_progression_pipeline.pipeline.helpers import context_handler, data, files, optuna_
 from ad_progression_pipeline.utils.constants import RANDOM_SEED
 
 
@@ -20,45 +21,48 @@ def train() -> None:
 
     @flow
     def objective(trial: optuna.trial.Trial) -> float:
-        params = optuna_.suggest_hyperparameters(ranges=context.optuna_ranges, trial=trial)
-        context_handler.set_hyperparameters(parameters=params)
+        try:
+            params = optuna_.suggest_hyperparameters(ranges=context.optuna_ranges, trial=trial)
+            context_handler.set_hyperparameters(parameters=params)
 
-        train_data, test_data = data.read_impute_select()
-        # will return data w/ NACCID
+            log.info("NEW TRIAL STARTING WITH PARAMS: ")
+            log.info(params)
 
-        if context.model_type == "binary":
-            train_data = categorical_ingestion(df=train_data)
-            test_data = categorical_ingestion(df=test_data)
-            train_data, val_data = train_test_split(train_data, test_size=0.2, random_state=RANDOM_SEED)
-            model.train(train_data)
-            results = model.infer_and_gather_metrics(val_data)
+            train_data, test_data = data.read_impute_select()
+            # will return data w/ NACCID
 
-        elif context.model_type == "sequence":
-            train_input_matrix, train_output_matrix = sequential_ingestion(df=train_data)
-            test_input_matrix, test_input_matrix = sequential_ingestion(df=test_data)
+            if context.model_type == "binary":
+                # confirmed with PDB here that train and test have same columns
 
-            import pdb
+                train_data, test_data = categorical_ingestion(train_df=train_data, test_df=test_data)
+                train_data, val_data = train_test_split(train_data, test_size=0.2, random_state=RANDOM_SEED)
+                model.train(df=train_data)
+                results = model.infer_and_gather_metrics(df=val_data)
+                objective_value = results["balanced_accuracy_score"]
 
-            pdb.set_trace()
+            elif context.model_type == "sequence":
+                train_input_matrix, train_output_matrix, test_input_matrix, test_output_matrix = sequential_ingestion(  # noqa: F841
+                    train_df=train_data,
+                    test_df=test_data,
+                )
 
-            train_data, val_data = train_test_split(train_data, test_size=0.2, random_state=RANDOM_SEED)
+                train_data, val_data = train_test_split(train_data, test_size=0.2, random_state=RANDOM_SEED)
 
-            import pdb
+                train_input_matrix, val_input_matrix, train_output_matrix, val_output_matrix = train_test_split(
+                    train_input_matrix,
+                    train_output_matrix,
+                    test_size=0.2,
+                    random_state=RANDOM_SEED,
+                )
+                model.train(input_matrix=train_input_matrix, output_matrix=train_output_matrix)
+                results = model.infer_and_gather_metrics(input_matrix=val_input_matrix, output_matrix=val_output_matrix)
+                objective_value = -results["weighted mse"]  # beware the negative
 
-            pdb.set_trace()
-            train_input_matrix, val_input_matrix, train_output_matrix, val_output_matrix = train_test_split(
-                train_input_matrix,
-                train_output_matrix,
-                test_size=0.2,
-                random_state=RANDOM_SEED,
-            )
-            model.train(train_input_matrix, train_output_matrix)
-            results = model.infer_and_gather_metrics(train_input_matrix, train_output_matrix)
-
-        objective_value = results["balanced_accuracy"] if context.model_type == "binary" else results["mse"]
-
-        if trial.number == 0 or objective_value > study.best_value:
-            model.serialize(output_dir)
-        return objective_value
+            if trial.number == 0 or objective_value > study.best_value:
+                model.serialize(output_dir)
+            return objective_value
+        except sklearn.exceptions.NotFittedError as err:
+            log.info("NOT FITTED ERROR. PRUNING THIS RUN.")
+            raise optuna.exceptions.TrialPruned from err
 
     study.optimize(objective, n_trials=100)

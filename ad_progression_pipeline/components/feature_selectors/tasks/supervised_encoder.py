@@ -1,50 +1,55 @@
-import gc
-
 import pandas as pd
 import tensorflow as tf
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.preprocessing import LabelEncoder
 from tensorflow.keras.layers import Dense, Input
 from tensorflow.keras.models import Model
 
-from ad_progression_pipeline.components.ingestion.tasks import column_transformers
 from ad_progression_pipeline.utils.prefect import local_cached_task
 
 
 @local_cached_task
-def train(df: pd.DataFrame, epochs: int = 50, top_X: int = 40) -> tuple[any, any]:
-    df = column_transformers.run(df)
+def train(df: pd.DataFrame, top_x: int, epochs: int = 50) -> Model:
+    X = df.drop(["CDRSUM", "NACCID"], axis=1)
+    y = df["CDRSUM"]
 
-    X = df.drop("CDRSUM", axis=1)  # Input features
-    y = df["CDRSUM"]  # Response variable
+    # Encode y to integers starting from 0
+
+    le = LabelEncoder()
+    y_encoded = le.fit_transform(y)
+    num_classes = len(le.classes_)
+
+    # One-hot encode y
+    from tensorflow.keras.utils import to_categorical
+
+    y_categorical = to_categorical(y_encoded, num_classes=num_classes)
 
     inputs = Input(shape=(X.shape[1],))
 
-    # Add the layers
+    # Define the model architecture
     x = Dense(64, activation="relu")(inputs)
     x = Dense(64, activation="relu")(x)
-    x = Dense(top_X, activation="relu")(x)
-    outputs = Dense(y.shape[1], activation="softmax")(x)
+    embeddings = Dense(top_x, activation="relu")(x)  # Embedding layer
+    outputs = Dense(num_classes, activation="softmax")(embeddings)
 
-    # Create the model
     model = Model(inputs=inputs, outputs=outputs)
     model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
 
-    model.fit(X, y, epochs=epochs, batch_size=16)
+    model.fit(X, y_categorical, epochs=epochs, batch_size=16)
 
     return model
 
 
 @local_cached_task
-def apply(df, model):
-    df = column_transformers.run(df)
+def apply(df: pd.DataFrame, model: Model) -> pd.DataFrame:
+    X = df.drop(["CDRSUM", "NACCID"], axis=1)
 
-    X = df.drop("CDRSUM", axis=1)
+    layer_output_model = tf.keras.Model(inputs=model.input, outputs=model.get_layer(index=-2).output)
+    embeddings = layer_output_model.predict(X, verbose=0)
 
-    last_dense_layer_model = tf.keras.Model(inputs=model.input, outputs=model.layers[-2].output)
-
-    output_values = last_dense_layer_model.predict(X, verbose=0)
-
-    new_df = pd.DataFrame(output_values)
+    new_df = pd.DataFrame(embeddings)
+    new_df["NACCID"] = df.reset_index()["NACCID"]
     new_df["CDRSUM"] = df.reset_index()["CDRSUM"]
+
+    # CONFIRMED with PDB here that embeddings look fine, with NACCID and CDRSUM at the end.
 
     return new_df

@@ -18,28 +18,60 @@ def gen_y(df: pd.DataFrame) -> pd.DataFrame:
     return df.groupby("NACCID").tail(TOTAL_VISITS - context.num_input_visits)
 
 
-@local_cached_task
-def progression_map(df: pd.DataFrame) -> pd.DataFrame:
-    last_cdrsum_x = gen_x(df).groupby("NACCID")["CDRSUM"].last()
+def progression_sliding_window(cdrsum_matrix: np.ndarray) -> np.ndarray:
+    """Calculates progression for each NACCID based on sliding window logic.
 
-    progression_ = []
+    Args:
+        cdrsum_matrix (np.ndarray): A 2D array with dimensions (number of NACCIDs, TOTAL_VISITS)
+                                     where each row represents the CDRGLOB values for a single NACCID.
 
-    for naccid, group in gen_y(df).groupby("NACCID"):
-        if naccid in last_cdrsum_x:
-            last_cdrsum = last_cdrsum_x[naccid]
+    Returns:
+        np.ndarray: A 1D array with dimensions (number of NACCIDs, 1) containing 0 or 1.
+    """
+    # Initialize a list to store the progression status for each subject
+    progression_list = []
 
-            # Check that the sequence of CDRSUM in Y is non-decreasing
-            non_decreasing = all(group["CDRSUM"].iloc[i] >= group["CDRSUM"].iloc[i - 1] for i in range(1, len(group)))
+    # Assuming cdrsum_matrix is a list of lists, where each inner list contains TOTAL_VISITS CDRSUM values for a subject
+    for cdrsum in cdrsum_matrix:  # For each subject's sequence of CDRSUM values
+        # List to store progression status for each sliding window of size 3
+        progressor_all_temp_list = []
 
-            # Check that Y increases in CDRSUM from X
-            has_greater = any(group["CDRSUM"] > last_cdrsum)
+        # Total number of windows is total visits minus window size plus 1
+        num_windows = len(cdrsum) - 2  # For TOTAL_VISITS visits, num_windows = 5
 
-            # Main Progression condition
-            progression = 1 if non_decreasing and has_greater else 0
+        # Iterate over each possible starting index of the sliding window
+        for i in range(num_windows):  # i from 0 to 4 inclusive (5 windows)
+            # Extract current window of size 3 starting at index i
+            current_window = cdrsum[i : i + 3]
 
-            progression_.append((naccid, progression))
+            # Extract next values for each position in the current window
+            # If there is no next value, use the last value (mimicking R's lead with default)
+            next_window = []
+            for j in range(i + 1, i + 4):
+                if j < len(cdrsum):
+                    next_window.append(cdrsum[j])
+                else:
+                    next_window.append(cdrsum[-1])  # Use last value if index is out of bounds
 
-    return pd.DataFrame(progression_, columns=["NACCID", "progression"])
+            # Check for initial increase between current and next window
+            initial_increase = [curr < next_ for curr, next_ in zip(current_window, next_window)]
+
+            # Check if all values are stable or increasing
+            is_stable_or_increasing = [curr <= next_ for curr, next_ in zip(current_window, next_window)]
+
+            # Determine progression status for this window
+            progressor_all_temp = any(initial_increase) and all(is_stable_or_increasing)
+
+            # Store the progression status for this window
+            progressor_all_temp_list.append(progressor_all_temp)
+
+        # After checking all windows, determine overall progression status for the subject
+        progressor_all = 1 if any(progressor_all_temp_list) else 0
+
+        # Append the result to the progression list
+        progression_list.append(progressor_all)
+
+    return np.array(progression_list).reshape(-1, 1)
 
 
 @local_cached_task
@@ -56,7 +88,9 @@ def flatten_add_progression(df: pd.DataFrame) -> pd.DataFrame:
                 {
                     **{col: x[col].iloc[0] for col in CONSTANT_COLUMNS},
                     **{
-                        f"{col}_{i+1}": x[col].iloc[i] for col in [feat for feat in x_.columns if feat not in CONSTANT_COLUMNS] for i in range(len(x))
+                        f"{col}_{i + 1}": x[col].iloc[i]
+                        for col in [feat for feat in x_.columns if feat not in CONSTANT_COLUMNS]
+                        for i in range(len(x))
                     },
                 },
             ),
@@ -64,16 +98,22 @@ def flatten_add_progression(df: pd.DataFrame) -> pd.DataFrame:
         .reset_index()
     )
 
-    result = pd.merge(result, progression_map(df), on="NACCID", how="left").drop(columns="NACCID")
+    grouped = df.groupby("NACCID")["CDRSUM"].apply(lambda x: list(x.values[:TOTAL_VISITS])).reset_index()
+    cdrsum_matrix = np.array([x + [x[-1]] * (TOTAL_VISITS - len(x)) if len(x) < TOTAL_VISITS else x[:TOTAL_VISITS] for x in grouped["CDRSUM"]])
+    progression_array = progression_sliding_window(cdrsum_matrix)
+    naccid_progression_df = pd.DataFrame({"NACCID": df["NACCID"].unique(), "progression": progression_array.flatten()})
 
-    result = result.loc[:, ~result.columns.str.contains("NACCID")]
+    result = pd.merge(result, naccid_progression_df, on="NACCID", how="left").drop(columns="NACCID")
 
-    return result
+    # Using PDB, I confirmed here that both test and train, when passed into this function, have 154 columns.
+
+    return result.loc[:, ~result.columns.str.contains("NACCID")]
 
 
 @local_cached_task
-def sequence_ingestion(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
-    progression_map(df)
+def sequence_ingestion(df: pd.DataFrame) -> list[np.ndarray]:
+    # NOTE: CDRSUM is the second to last column. Once NACCID is dropped, it will be the last column.
+    # This will be helpful info for RNN's infer_and_train function
 
     x_ = gen_x(df)
     y_ = gen_y(df)
@@ -98,4 +138,4 @@ def sequence_ingestion(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
     output_matrix = output_df.to_numpy()
     output_matrix = output_matrix.reshape((num_samples, timesteps, num_features))
 
-    return input_matrix, output_matrix
+    return [input_matrix, output_matrix]

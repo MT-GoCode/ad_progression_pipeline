@@ -1,10 +1,8 @@
 import pandas as pd
 from prefect import context, flow, get_run_logger
-from sklearn.model_selection import train_test_split
 
 from ad_progression_pipeline.components.feature_selectors.flows import run_feature_selection
 from ad_progression_pipeline.components.imputation.flows import run_imputation
-from ad_progression_pipeline.components.ingestion.flows import categorical_ingestion
 from ad_progression_pipeline.utils.constants import UNACCOUNTED_COLUMNS
 
 
@@ -15,10 +13,8 @@ def read_impute_select() -> tuple[pd.DataFrame, pd.DataFrame]:
     # STEP 0
     train = pd.read_csv(context.data_dir + "dataset/training_set.csv", index_col=0)
     test = pd.read_csv(context.data_dir + "dataset/test_set.csv", index_col=0)
-
-    # GLUE CODE : not sure how to impute these columns
-    train = train.drop(columns=UNACCOUNTED_COLUMNS)
-    test = test.drop(columns=UNACCOUNTED_COLUMNS)
+    train = train.drop(UNACCOUNTED_COLUMNS, axis=1)
+    test = test.drop(UNACCOUNTED_COLUMNS, axis=1)
 
     # STEP 1: IMPUTATION
     train, test = run_imputation(train_df=train, test_df=test)

@@ -6,11 +6,15 @@ num_input_visits : 3
 
 optuna_ranges :
   categorical :
+    smote :
+      - True
+      - False
     feature_selector :
       - LASSO
+      - supervised encoder
     num_features_selected :
-      - 40
       - 50
+      - 80
     criterion :
       - gini
       - entropy

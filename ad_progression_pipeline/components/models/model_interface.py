@@ -1,20 +1,17 @@
 from abc import ABC, abstractmethod
 from typing import Type
 
-import numpy as np
-import pandas as pd
-
 
 class ModelInterface(ABC):
     def __init__(self) -> None:
         self.model = None
 
     @abstractmethod
-    def train(self) -> None:
+    def train(self, **kwargs) -> None:  # noqa: ANN003
         pass
 
     @abstractmethod
-    def infer_and_gather_metrics(self) -> dict:
+    def infer_and_gather_metrics(self, **kwargs) -> dict:  # noqa: ANN003
         pass
 
     @abstractmethod

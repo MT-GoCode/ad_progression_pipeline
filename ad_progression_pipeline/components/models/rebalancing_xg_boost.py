@@ -1,44 +1,39 @@
-# import os
-# from collections import Counter
+import pandas as pd
+from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline
+from prefect import context
+from xgboost import XGBClassifier
 
-# import joblib
-# import matplotlib.pyplot as plt
-# import pandas as pd
-# from imblearn.over_sampling import SMOTE
-# from imblearn.pipeline import Pipeline
-# from prefect import context, get_run_logger
-# from sklearn.ensemble import RandomForestClassifier
-# from sklearn.metrics import accuracy_score, auc, confusion_matrix, f1_score, precision_score, recall_score, roc_curve, balanced_accuracy_score
-# from sklearn.preprocessing import StandardScaler
-# from xgboost import XGBClassifier
-# from ad_progression_pipeline.components.models.tasks.serialize_metrics import serialize_metrics
-# from ad_progression_pipeline.utils.constants import RANDOM_SEED
+from ad_progression_pipeline.utils.constants import RANDOM_SEED
 
-# from .rebalancing_random_forest import RebalancingRandomForest
+from .rebalancing_random_forest import RebalancingRandomForest
 
 
-# class RebalancingXGBoost(RebalancingRandomForest):
+class RebalancingXGBoost(RebalancingRandomForest):
+    def train(self: "RebalancingXGBoost", **kwargs) -> None:  # noqa: ANN003
+        df: pd.DataFrame = kwargs["df"]
 
-#     def train(self, df: pd.DataFrame) -> None:
-#         log = get_run_logger()
+        x = df.drop(columns=["progression"])
+        y = df["progression"]
 
-#         x = df.drop(columns=["progression"])
-#         y = df["progression"]
+        self.model = Pipeline(
+            [
+                ("smote", SMOTE(random_state=RANDOM_SEED) if context.hyperparameters["smote"] else "passthrough"),
+                (
+                    "classifier",
+                    XGBClassifier(
+                        random_state=RANDOM_SEED,
+                        n_estimators=context.hyperparameters["n_estimators"],
+                        max_depth=context.hyperparameters["max_depth"],
+                        learning_rate=context.hyperparameters["learning_rate"],
+                        subsample=context.hyperparameters["subsample"],
+                        gamma=context.hyperparameters["gamma"],
+                        booster=context.hyperparameters["booster"],
+                        use_label_encoder=False,  # Needed to avoid a warning
+                        eval_metric="logloss",  # Default evaluation metric for binary classification
+                    ),
+                ),
+            ],
+        )
 
-#         self.model = Pipeline(
-#             [
-#                 ("scaler", StandardScaler()),
-#                 ("smote", SMOTE(random_state=RANDOM_SEED)),
-#                 (
-#                     "classifier",
-#                     RandomForestClassifier(
-#                         random_state=RANDOM_SEED,
-#                         n_estimators=context.hyperparameters["n_estimators"],
-#                         max_depth=context.hyperparameters["max_depth"],
-#                         criterion=context.hyperparameters["criterion"],
-#                     ),
-#                 ),
-#             ],
-#         )
-
-#         self.model.fit(x, y)
+        self.model.fit(x, y)

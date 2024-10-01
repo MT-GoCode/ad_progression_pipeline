@@ -1,7 +1,7 @@
 import yaml
 from prefect import context, task
 
-from ad_progression_pipeline.components.models import RNN, RebalancingRandomForest, model_interface
+from ad_progression_pipeline.components.models import RNN, RebalancingRandomForest, RebalancingXGBoost, model_interface
 from ad_progression_pipeline.pipeline.end_to_end import train
 
 """
@@ -21,16 +21,17 @@ dynamic variables
 
 @task
 def initialize_context(config_file: str) -> None:
-    with open(config_file) as file:
+    with open(config_file) as file:  # noqa: PLW1514
         config = yaml.safe_load(file)
 
     pipeline_map = {
         "train": train.train,
         # "sequence_trainer" :
     }
-    model_map = {
+    model_map: dict[str, dict[str, type[model_interface.ModelInterface] | str]] = {
         "Random Forest": {"model": RebalancingRandomForest, "model_type": "binary"},
         "RNN": {"model": RNN, "model_type": "sequence"},
+        "XGBoost": {"model": RebalancingXGBoost, "model_type": "binary"},
     }
 
     context.pipeline = pipeline_map[config["pipeline"]]
@@ -38,7 +39,11 @@ def initialize_context(config_file: str) -> None:
     context.num_input_visits = config["num_input_visits"]
     context.optuna_ranges = config["optuna_ranges"]
     context.model_type = model_map[config["model"]]["model_type"]
-    context.model = model_interface.instantiate_model(model_map[config["model"]]["model"])
+
+    _ = model_map[config["model"]]["model"]
+
+    if issubclass(_, model_interface.ModelInterface):
+        context.model = model_interface.instantiate_model(_)
 
 
 @task

@@ -1,2 +1,4 @@
-**/*cache*/
+**/*pycache*/
 **/*temp*/
+data/*
+!data/**/.gitkeep

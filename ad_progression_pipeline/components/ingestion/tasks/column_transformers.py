@@ -1,9 +1,5 @@
-import numpy as np
 import pandas as pd
-from prefect import context, get_run_logger, task
 from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
-from sklearn.model_selection import StratifiedGroupKFold, StratifiedKFold, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
 
@@ -12,12 +8,27 @@ from ad_progression_pipeline.utils.prefect import local_cached_task
 
 
 @local_cached_task
-def run(df: pd.DataFrame):
-    log = get_run_logger()
-    add_later = df[["CDRSUM", "NACCID"]]
+def run(train_df: pd.DataFrame, test_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    # QUESTION TO RESOLVE: Should I train preprocessor only on train first, or on train and test values?
+    # There will be some unaccounted values in test_df if I only train on train_df
 
-    df = df.drop(columns=["CDRSUM", "NACCID"])
+    # METHOD 1 -> TRAIN ON TRAIN_DF + TEST_DF
+    full_df = pd.concat([train_df, test_df], ignore_index=True)
+    add_later = full_df[["CDRSUM", "NACCID"]].copy()
 
+    preprocessor = train(full_df)
+    full_df = apply(full_df, preprocessor)
+
+    full_df[["CDRSUM", "NACCID"]] = add_later[["CDRSUM", "NACCID"]]
+
+    train_df_preprocessed = full_df[: len(train_df)].copy()
+    test_df_preprocessed = full_df[len(train_df) :].copy()
+
+    return train_df_preprocessed, test_df_preprocessed
+
+
+@local_cached_task
+def train(df: pd.DataFrame) -> ColumnTransformer:
     cat_feats = [x for x in CATEGORICAL_FEATURES if x in df.columns.values]
     ord_feats = [x for x in ORDINAL_FEATURES if x in df.columns.values]
     num_feats = [x for x in NUMERICAL_FEATURES if x in df.columns.values]
@@ -34,11 +45,9 @@ def run(df: pd.DataFrame):
     )
     ordinal_transformer = Pipeline(
         steps=[
-            ("encoder", OrdinalEncoder()),
+            ("encoder", OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1)),
         ],
     )
-    log.info("comparing what columns we have to transform vs total columns")
-    log.info([_ for _ in df.columns if _ not in cat_feats + num_feats + ord_feats])
 
     preprocessor = ColumnTransformer(
         transformers=[
@@ -50,15 +59,15 @@ def run(df: pd.DataFrame):
     )
 
     preprocessor.fit(df)
+    return preprocessor
+
+
+def apply(df: pd.DataFrame, preprocessor: ColumnTransformer) -> pd.DataFrame:
     transformed_data = preprocessor.transform(df)
 
-    # new columns consists of the new one hot encoded columns... and everything else as before
+    cat_feats = [x for x in CATEGORICAL_FEATURES if x in df.columns.values]
+    ord_feats = [x for x in ORDINAL_FEATURES if x in df.columns.values]
+    num_feats = [x for x in NUMERICAL_FEATURES if x in df.columns.values]
 
-    new_columns = num_feats + ord_feats + list(preprocessor.transformers_[2][1].named_steps["encoder"].get_feature_names_out(cat_feats))
-
-    df = pd.DataFrame(transformed_data, columns=new_columns)
-
-    df["CDRSUM"] = add_later["CDRSUM"]
-    df["NACCID"] = add_later["NACCID"]
-
-    return df
+    new_columns = num_feats + ord_feats + list(preprocessor.named_transformers_["cat"].steps[0][1].get_feature_names_out(cat_feats))
+    return pd.DataFrame(transformed_data, columns=new_columns)

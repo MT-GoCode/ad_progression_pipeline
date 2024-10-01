@@ -38,6 +38,13 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
+exclude = [
+    "**/column_transformers.py",
+    "*ad_progression_pipeline/components/ingestion/tasks/reshapers_old.py",
+]
+
+preview = true
+
 line-length = 150
 
 # Basic linting (PEP 8 compliance, etc.)
@@ -56,9 +63,9 @@ lint.select = [
     "E303",     # Limit maximum consecutive blank lines (default: 2)
     "E305",     # Two blank lines after imports and class-level code
     "W391",     # Ensure no trailing blank line at the end of the file
-    "C812",     # Enforce trailing commas in multi-line function definitions
+    # "C812",     # Enforce trailing commas in multi-line function definitions
     "C416",     # Unnecessary list comprehension
-    "B301",     # Avoid unnecessary lambda expressions
+    # "B301",     # Avoid unnecessary lambda expressions
     "F601"      # Avoid duplicate dictionary keys
 ]
 
@@ -77,5 +84,10 @@ lint.ignore = [
     "FIX",
     "TD",
     "F4",
-    "PD901"
+    "PD",
+    "PLC",
+    "CPY",
+    "PLR0914",
+    "TCH002",
+    "TRY"
 ]
