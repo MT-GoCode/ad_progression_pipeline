@@ -1,7 +1,10 @@
 import yaml
 from prefect import context, task
 
-from ad_progression_pipeline.components.models import RNN, RebalancingRandomForest, RebalancingXGBoost, model_interface
+from ad_progression_pipeline.components.models import (RNN,
+                                                       RebalancingRandomForest,
+                                                       RebalancingXGBoost,
+                                                       model_interface)
 from ad_progression_pipeline.pipeline.end_to_end import train
 
 """

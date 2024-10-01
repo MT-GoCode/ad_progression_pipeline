@@ -7,9 +7,12 @@ from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline
 from prefect import context
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, auc, balanced_accuracy_score, confusion_matrix, f1_score, precision_score, recall_score, roc_curve
+from sklearn.metrics import (accuracy_score, auc, balanced_accuracy_score,
+                             confusion_matrix, f1_score, precision_score,
+                             recall_score, roc_curve)
 
-from ad_progression_pipeline.components.models.tasks.serialize_metrics import serialize_metrics
+from ad_progression_pipeline.components.models.tasks.serialize_metrics import \
+    serialize_metrics
 from ad_progression_pipeline.utils.constants import RANDOM_SEED
 
 from .model_interface import ModelInterface

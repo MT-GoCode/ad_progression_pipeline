@@ -25,6 +25,7 @@ tbtrim = "^0.3.1"
 tensorflow-cpu = "^2.17.0"
 tensorflow-intel = "^2.12.0"
 xgboost = "^2.1.1"
+isort = "^5.13.2"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -50,12 +51,12 @@ line-length = 150
 # Basic linting (PEP 8 compliance, etc.)
 lint.select = [
     "ALL",      # General linting rules (does NOT select everything)
-    "I001",     # Import sorting via isort
+    #"I001",     # Import sorting via isort
     # "B006",    # Detect mutable default arguments
     "B008",     # Enforce keyword-only arguments
     # "D",       # Ensure docstrings for classes, functions, methods
     "ANN",      # Type hints for function arguments and return values
-    "F401",     # Unused imports
+    #"F401",     # Unused imports
     "F841",     # Unused variables
     "E711",     # Use 'is' or 'is not' for None comparisons
     "E301",     # One blank line before functions and classes

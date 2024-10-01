@@ -1,4 +1,5 @@
 **/*pycache*/
+**/*ruff_cache*/
 **/*temp*/
 data/*
 !data/**/.gitkeep

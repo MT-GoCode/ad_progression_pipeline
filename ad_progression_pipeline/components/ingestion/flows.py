@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from ad_progression_pipeline.components.ingestion.tasks import column_transformers, reshapers
+from ad_progression_pipeline.components.ingestion.tasks import (
+    column_transformers, reshapers)
 from ad_progression_pipeline.utils.prefect import local_cached_task
 
 

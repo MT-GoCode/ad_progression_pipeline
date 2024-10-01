@@ -4,20 +4,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from prefect import context
-from sklearn.metrics import (
-    accuracy_score,
-    balanced_accuracy_score,
-    confusion_matrix,
-    f1_score,
-    precision_score,
-    recall_score,
-)
+from sklearn.metrics import (accuracy_score, balanced_accuracy_score,
+                             confusion_matrix, f1_score, precision_score,
+                             recall_score)
 from tensorflow.keras import backend as K  # noqa: N812
 from tensorflow.keras import layers, models
 from tensorflow.keras.callbacks import EarlyStopping
 
-from ad_progression_pipeline.components.ingestion.tasks.reshapers import progression_sliding_window
-from ad_progression_pipeline.components.models.tasks.serialize_metrics import serialize_metrics
+from ad_progression_pipeline.components.ingestion.tasks.reshapers import \
+    progression_sliding_window
+from ad_progression_pipeline.components.models.tasks.serialize_metrics import \
+    serialize_metrics
 from ad_progression_pipeline.utils.constants import TOTAL_VISITS
 
 from .model_interface import ModelInterface

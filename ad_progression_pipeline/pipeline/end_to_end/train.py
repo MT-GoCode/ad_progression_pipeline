@@ -3,9 +3,12 @@ import sklearn
 from prefect import context, flow, get_run_logger
 from sklearn.model_selection import train_test_split
 
-from ad_progression_pipeline.components.ingestion.flows import categorical_ingestion, sequential_ingestion
-from ad_progression_pipeline.components.models.model_interface import ModelInterface
-from ad_progression_pipeline.pipeline.helpers import context_handler, data, files, optuna_
+from ad_progression_pipeline.components.ingestion.flows import (
+    categorical_ingestion, sequential_ingestion)
+from ad_progression_pipeline.components.models.model_interface import \
+    ModelInterface
+from ad_progression_pipeline.pipeline.helpers import (context_handler, data,
+                                                      files, optuna_)
 from ad_progression_pipeline.utils.constants import RANDOM_SEED
 
 
